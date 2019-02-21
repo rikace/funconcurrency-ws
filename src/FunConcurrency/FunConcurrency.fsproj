@@ -26,9 +26,6 @@
     <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="AgentScript.fsx" />
-    <None Include="AsyncScript.fsx" />
-    <None Include="ReactiveScript.fsx" />
     <Compile Include="Common\Helpers.fs" />
     <Compile Include="Common\Interfaces.fs" />
   </ItemGroup>
@@ -44,6 +41,9 @@
   <ItemGroup>
     <Compile Include="Module1_WebCrawler\AgentWebCrawler.fs" />
   </ItemGroup>
+    <None Include="AgentScript.fsx" />
+    <None Include="AsyncScript.fsx" />
+    <None Include="ReactiveScript.fsx" />
   <ItemGroup>
     <Content Include="Images\GinevraBenci.jpg" />
     <Content Include="Images\LadyErmine.jpg" />

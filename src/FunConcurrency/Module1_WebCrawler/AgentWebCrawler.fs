@@ -1,16 +1,5 @@
 module FunConcurrency.AgentWebCrawler
 
-
-(*
-MODULE 1    Web-Crawler        (FunConcurrency.AgentWebCrawler)
-    BONUS        Error handling + supervision
-MODULE 2    Web-Crawler Parallel
-MODULE 3    Agent compoistion (FunConcurrency.MessagePassing.AgentPipeline) >=> (+ parallelism)
-MODULE 4    Async Combinators + Async/Error
-    BONUS        Comp Expression
-Module 5    Agent + RX
-*)
-
 #if INTERACTIVE
 #load "../Common/Helpers.fs"
 #load "../Asynchronous/Async.fs"
