@@ -67,7 +67,7 @@ module ParallelWebCrawler =
        "http://www.yahoo.com";     "http://www.amazon.com"
        "http://news.yahoo.com";    "http://www.microsoft.com"; ]
 
-    // Step (1) create an Agent that prints the messages received
+    // Step (1) create an Agent that prints the messages.
     //    this is important in parallel computations that print some output
     //    to keep the console in a readable state
     let printerAgent =
@@ -84,7 +84,7 @@ module ParallelWebCrawler =
     // Step (2)
     //     create a "parallelAgent" worker based on the MailboxPorcerssor.
     //     the idea is to have an Agent that handles, computes and distributes the messages
-    //     in a Round-Robin fashion between a set of (intern and pre-instantiated) Agent children
+    //     in a Round-Robin fashion between a set of (intern and pre-instantiated) Agent-children
     //
     //     This is important in the case of async computaions, so you can achieve great throughput
     //     If already completed the "Agent Pipeline" lab, then feel free to use the "parallelAgent" already created
@@ -243,7 +243,7 @@ module ParallelWebCrawler =
             loop ())
 
     // Step (6)
-    // complete the "side effect" function as you wish.
+    // complete the "side effect" function.
     // For example, you could just print the image name downloaded and/or save it to the file-system
     let saveImageAgent : Agent<Msg<string, unit>> =
         imageSideEffet (fun url buffer -> async {
@@ -260,7 +260,7 @@ module ParallelWebCrawler =
         let linkBroadcaster = broadcastAgent ()
         let linksParserAgent = linksParserAgent ()
 
-        //   remove comment below when done
+        //   remove comment below
         //   let imageParserAgent = imageParserAgent ()
 
         // Step (6)
@@ -279,7 +279,7 @@ module ParallelWebCrawler =
 
 // BONUS
 // what happen if an error is thrown ??
-// we could use the build in functionality for Error
+// we could use the Agent build in functionality for Error
 // propagation to do something, like logging or recovering from errors
 
 type MailboxProcessor<'T> with

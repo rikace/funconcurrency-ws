@@ -65,11 +65,9 @@ module ReactiveAgent =
 
         // Step (1)
         // Implement both the reactive interfaces IObserver and IObservable, also pay attention to the generic
-        // type constarctor for these intefaces, they might not be the same.
+        // type constractor for these intefaces, they might not be the same.
         // Then, expose the IObservable interface throughout an instance method called "AsObservable".
-        // This methid is used to register the output after each message is processed.
 
-        //
         /// somthing like :        member x.AsObservable() = (x :> IObservable<'U>)
 
         // Step (2)

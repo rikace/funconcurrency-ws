@@ -60,13 +60,13 @@ xs
 
 
 // Step (1)
-// How can you handle the exception in case of not existing URL?
-// TIP:    avoid the try-catch block and check if there is an existing
+// How can you handle exceptions in case of not existing URL?
+// TIP:    avoid to use a try-catch (try-with) block and check if there is an existing
 //         "Async" api that could help you
 //         In addition, you should still be able to branch logic in both the
 //         "success" and "failure" paths using the F# Result<_,_> type
 //
-// FIX THE CODE BELOW REMOVING THE "try-with" block with a more idiomatic approach
+// FIX THE CODE BELOW BY REMOVING THE "try-with" block with a more idiomatic approach
 // Tips: the build in "Result<_,_>" and "Choice*" types could be helpful. In this example,
 // use the "AsyncRes" type define below as building block
 

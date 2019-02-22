@@ -19,7 +19,7 @@ open FunConcurrency
 //
 //          try to handle messages that could run a computation either "sync" or "async"
 //          TIP: you could have a DU to handle a different type of message (for either a Sync or Async computation)
-//               or to load the computation at runtime. In this last case, the Agent body should keep an
+//               or load the computation at runtime. In this last case, the Agent body should keep an
 //               internal state of the function passed
 
 let agent computation = Agent<'a * AsyncReplyChannel<'b>>.Start(fun inbox ->
@@ -38,11 +38,11 @@ printfn "%s" res
 
 
 // Step (2) implememt the "pipeline" function to compose agents, where the result of the
-//          first "Agent" is passed to the second "Agent"
+//          first "Agent" computation is passed to the second "Agent".
 //          The idead of this function is to use the previously implemented
-//          well structured agent (in step 1), to pass a message, process the message,
-//          and return the result of the agent compoutation to the next "Agent"
-//          BONUS - Try also to implement a function that handle Async computation
+//          well structured agent (in step 1), to pass a message, then process the message,
+//          and finally pass the result of the agent compoutation to the next "Agent"
+//          BONUS - Try to implement a function that handle Async computations
 
 let pipelineAgent (f:'a -> 'b) (value : 'a) : Async<'b> =
     // MISSING CODE
@@ -52,7 +52,7 @@ let pipelineAgent (f:'a -> 'b) (value : 'a) : Async<'b> =
 // Step (3) compose pipeline
 // given two agents (below), compose them into a pipeline
 // in a way that calling (or sending a message) to the pipeline,
-// the message is passed across all the agents in the pipelin
+// the message is passed across all the agents in the pipeline
 
 // TIP: Remeber the "async bind" operator?
 //      the signature of the Async.bind operator fits quite well in this context,
@@ -60,7 +60,6 @@ let pipelineAgent (f:'a -> 'b) (value : 'a) : Async<'b> =
 // TIP: It could be useful to use an infix operator to simplify the composition between Agents
 // BONUS: after have composed the agents, try to use (and implement) the Kliesli operator
 
-// this function can be found in the module AsyncEx
 // (‘a -> Async<’b>) -> Async<’a> -> Async<’b>
 let agentBind f xAsync = async {
     let! x = xAsync
@@ -99,7 +98,7 @@ let operation i = pipeline' <| message i
 //
 //     create a "parallelAgent" worker based on the MailboxPorcerssor.
 //     the idea is to have an Agent that handles, computes and distributes the messages
-//     in a Round-Robin fashion between a set of (intern and pre-instantiated) Agent children
+//     in a Round-Robin fashion between a set of (intern and pre-instantiated) Agent-children
 
 let cts = new CancellationTokenSource()
 
@@ -183,7 +182,7 @@ module AgentComposition =
     let loadandApply3dImageAgent = parallelAgent 2 loadandApply3dImage
 
     // Step (7) use the "pipeline" function created in step (2), and replace the basic "agent"
-    //          with the "parallelAgent". keep in mind of the extra parameter "limit" to indicate
+    //          with the "parallelAgent". Keep in mind of the extra parameter "limit" to indicate
     //          the level of parallelism
     //          - the "Unchecked.defaultof<_>" is a place-holder, replace it with the implementation
 
@@ -191,7 +190,7 @@ module AgentComposition =
     let apply3DEffectAgent : ImageInfo -> Async<ImageInfo> =  Unchecked.defaultof<_>
     let saveImageAgent : ImageInfo -> Async<string> =  Unchecked.defaultof<_>
 
-    // Step (8) compose the previuous function
+    // Step (8) compose the previous functions
     //          - loadImageAgent, apply3DEffectAgent, saveImageAgent
     let parallelPipeline :string -> Async<string> = Unchecked.defaultof<_>
 
