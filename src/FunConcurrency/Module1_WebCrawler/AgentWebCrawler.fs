@@ -115,14 +115,17 @@ module ParallelWebCrawler =
         agent
 
     // Step (3) complete the "Item(url)" case
+
+    // Step (3) complete the "Item(url)" case
     let fetchContetAgent (limit : int option) =
-        parallelAgent parallelism (fun (inbox : MailboxProcessor<_>) ->
+        parallelAgent parallelism (fun inbox ->
             let rec loop (urls : Set<string>) (agents : Agent<_> list) = async {
                 let! msg = inbox.Receive()
 
                 match msg with
                 | Item(url) ->
-                    // check if the content of the "url" has been already downloaded.
+                    // check if the content of the "url" has been alredy
+                    // downloaded.
                     // if not then
                     //     downloaded the content (use the function "downloadContent")
                     //     and print (using the "printerAgent") a message that the "content of url %s hes been downloaded"
@@ -131,20 +134,24 @@ module ParallelWebCrawler =
                     //               the registration is done using the "Mailbox(agent)" message/case.
                     //               The list of agent subscribed is kept as state of the agent loop (agents : Agent<_> list)
                     // else
-                    //     do nothing
-                    //
+                    //     nothing
                     // verify if the limit of the Urls downloaded is reached, and stop the process accordingly
                     // (keep in mind that the "limit" is an option type (if None then the process is limiteless)
 
-                    return! loop urls agents
-
-                // the "Msg<_,_>" case is not completed.
-                // finish the code covering the missing "Msg<_,_>" cases.
-                // this missing case is resposible to register the Agents (passed as message)
-                // into the current Agent body.
-
+                    if urls |> Set.contains url |> not then
+                        let! content = downloadContent url
+                        content |> Option.iter(fun c ->
+                            for agent in agents do
+                                agent.Post (Item(c)))
+                        let urls' = (urls |> Set.add url)
+                        match limit with
+                        | Some l when urls' |> Seq.length >= l -> cts.Cancel()
+                        | _ -> return! loop urls' agents
+                    else return! loop urls agents
+                | Mailbox(agent) -> return! loop urls (agent::agents)
             }
             loop Set.empty [])
+
 
     // Testing
     let testFetchContetAgent () =
