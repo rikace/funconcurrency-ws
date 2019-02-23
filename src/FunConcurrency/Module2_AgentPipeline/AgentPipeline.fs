@@ -2,7 +2,7 @@ module FunConcurrency.MessagePassing.AgentPipeline
 
 #if INTERACTIVE
 #load "../Common/Helpers.fs"
-#load "../Module3_Asynchronous/Async.fs"
+#load "../Asynchronous/Async.fs"
 #r "System.Drawing.dll"
 #endif
 
@@ -15,49 +15,51 @@ open FunConcurrency.Async.AsyncOperators
 open FunConcurrency
 
 // Step (1) implement a structured agent that returns
-//          the rusult of the "computation" over a message received
+//          the rusult of the "computation" over the message received
 //
 //          try to handle messages that could run a computation either "sync" or "async"
-//          TIP: you could have a DU to handle a different type of message (for either a Sync or Async computation)
+//          TIP: you could have a DU to handle a different type of message (to run either Sync or Async)
 //               or load the computation at runtime. In this last case, the Agent body should keep an
-//               internal state of the function passed
+//               internal state of the function
 
 let agent computation = Agent<'a * AsyncReplyChannel<'b>>.Start(fun inbox ->
     let rec loop () = async {
-
-        // MISSING CODE
-
+        let! msg, replyChannel = inbox.Receive()
+        let res = computation msg
+        replyChannel.Reply res
         return! loop() }
     loop() )
 
-
-// Testing
-let myAgent = agent (fun (x : int) -> sprintf "the square of %d is %d" x (x * x))
-let res = myAgent.PostAndReply(fun ch -> (6, ch))
-printfn "%s" res
-
-
-// Step (2) implememt the "pipeline" function to compose agents, where the result of the
-//          first "Agent" computation is passed to the second "Agent".
+// Step (2) compose agents implementing the "pipeline" function.
 //          The idead of this function is to use the previously implemented
-//          well structured agent (in step 1), to pass a message, then process the message,
-//          and finally pass the result of the agent compoutation to the next "Agent"
-//          BONUS - Try to implement a function that handle Async computations
+//          well structured agent (in step 1), to pass a message and return the result of the
+//          agent compoutation.
+//          - Try also to implement a function that handle Async computation
 
-let pipelineAgent (f:'a -> 'b) (value : 'a) : Async<'b> =
-    // MISSING CODE
-    Unchecked.defaultof<_> // << remove this line
+//let pipelineAsyncAgent (f:'a -> Async<'b>) (m: 'a) : Async<'b> =
+//    let a = agent f
+//    a.PostAndAsyncReply(fun replyChannel -> m, replyChannel)
+
+let pipelineAgent (f:'a -> 'b) (m: 'a) : Async<'b> =
+    let a = agent f
+    a.PostAndAsyncReply(fun replyChannel -> m, replyChannel)
 
 
 // Step (3) compose pipeline
 // given two agents (below), compose them into a pipeline
 // in a way that calling (or sending a message) to the pipeline,
-// the message is passed across all the agents in the pipeline
+// the message is passed across all the agents in the pipelin
 
-// TIP: Remeber the "async bind" operator?
-//      the signature of the Async.bind operator fits quite well in this context,
-//      becase the return type of the "pipelineAgent" function is an "Async<_>"
-// TIP: It could be useful to use an infix operator to simplify the composition between Agents
+// Testing
+let agent1 = pipelineAgent (sprintf "Pipeline 1 processing message : %s")
+let agent2 = pipelineAgent (sprintf "Pipeline 2 processing message : %s")
+
+let message i = sprintf "Message %d sent to the pipeline" i
+
+// TIP: Remeber the async bind operator?
+//      the signature of the Async.bind operator fits quite well,
+//      becase the return type of the "pipelineAgent" function is an Async<_>
+// TIP: It is useful to use an infix operator to simplify the composition between Agents
 // BONUS: after have composed the agents, try to use (and implement) the Kliesli operator
 
 // (‘a -> Async<’b>) -> Async<’a> -> Async<’b>
@@ -67,28 +69,18 @@ let agentBind f xAsync = async {
 
 let agentRetn x = async { return x }
 
-
-
-// Testing
-let agent1 = pipelineAgent (sprintf "Pipeline 1 processing message : %s")
-let agent2 = pipelineAgent (sprintf "Pipeline 2 processing message : %s")
-
-let message i = sprintf "Message %d sent to the pipeline" i
-
-for i in [0..5] do
-    agent1 (string i) |> Async.run (fun res -> printfn "%s" res)
-
-
+let (>>=) x f = agentBind f x
 let pipeline x = agentRetn x >>= agent1 >>= agent2
 
 for i in [1..10] do
     pipeline (string i)
-    |> Async.run (fun res -> printfn "Thread #id: %d - Msg: %s" Thread.CurrentThread.ManagedThreadId res)
+    |> AsyncEx.run (fun res -> printfn "Thread #id: %d - Msg: %s" Thread.CurrentThread.ManagedThreadId res)
 
+module PipelineKliesli =
+    let (>=>) f1 f2 x = f1 x >>= f2
+    let pipeline = agent1 >=> agent2
 
-let pipeline' = agent1 >=> agent2
-
-let operation i = pipeline' <| message i
+    let operation i = pipeline <| message i
 
 
 
@@ -96,15 +88,11 @@ let operation i = pipeline' <| message i
 //    How can you make these agents running in parallel?
 //    This is important in the case of async computaions, so you can reach great throughput
 //
-//     create a "parallelAgent" worker based on the MailboxPorcerssor.
-//     the idea is to have an Agent that handles, computes and distributes the messages
-//     in a Round-Robin fashion between a set of (intern and pre-instantiated) Agent-children
-
-let cts = new CancellationTokenSource()
+//    Implement an Agent which underlying body computes and distributes the messages in a Round-Robin fashion
+//    between a set of (intern and pre-instantiated) Agent children
 
 let parallelAgent (parallelism: int) (computation: 'a -> Async<'b>) =
-    let token = cts.Token
-
+    // MISSING CODE HERE
     let behavior = (fun (inbox: MailboxProcessor<'a * AsyncReplyChannel<'b>>) ->
         let rec loop () = async {
             let! msg, replyChannel = inbox.Receive()
@@ -112,27 +100,14 @@ let parallelAgent (parallelism: int) (computation: 'a -> Async<'b>) =
             replyChannel.Reply res
             return! loop() }
         loop() )
-
-    // MISSING CODE HERE
-    // 1 - use the "Array" module to initalize an array of Agents.
-    //     the "behavior" agent is useful to handle the reply-channel
-    let agents = Unchecked.defaultof<MailboxProcessor<_> []> // << replace this line with implementation
-
-    // 2 - crete an agent that broadcasts the messages received
-    //     in a Round-Robin fashion between the agents created in the  previous point
-    let agent = new Agent<_>((fun inbox ->
+    let agents = Array.init parallelism (fun _ -> MailboxProcessor.Start(behavior))
+    Agent<'a * AsyncReplyChannel<'b>>.Start(fun inbox ->
         let rec loop index = async {
-            let! msg = inbox.Receive()
-            // MISSING CODE HERE
-
-            return! loop index
-        }
-        loop 0), cancellationToken = token)
-
-    token.Register(fun () -> agents |> Seq.iter(fun agent -> (agent :> IDisposable).Dispose())) |> ignore
-    agent.Start()
-    fun (a: 'a) -> agent.PostAndAsyncReply(fun ch -> (a, ch)) : Async<'b>
-
+            let! (msg, ch) = inbox.Receive()
+            agents.[index].Post(msg, ch)
+            return! loop((index+1) % parallelism)
+         }
+        loop 0)
 
 module AgentComposition =
 
@@ -176,28 +151,37 @@ module AgentComposition =
 
     open ImageHelpers
 
+// Step (6) apply the parallelAgent to run the below function "loadandApply3dImageAgent"
 
-    // Step (6) apply the parallelAgent to run the below function "loadandApply3dImageAgent"
+    // place holder, this function was implemented in step 3
+    let (>>=) (x: Async<'a>) (f: 'a -> Async<'b>) = Unchecked.defaultof<Async<'b>> // agentBind f x
+
+
     let loadandApply3dImage imagePath = agentRetn imagePath >>= loadImage >>= apply3D >>= saveImage
     let loadandApply3dImageAgent = parallelAgent 2 loadandApply3dImage
 
-    // Step (7) use the "pipeline" function created in step (2), and replace the basic "agent"
-    //          with the "parallelAgent". Keep in mind of the extra parameter "limit" to indicate
-    //          the level of parallelism
-    //          - the "Unchecked.defaultof<_>" is a place-holder, replace it with the implementation
+// Step (7) use the "pipeline" function created in step (2), and replace the basic "agent""
+//          with the "parallelAgent". keep in mind of the extra parameter "limit" to indicate
+//          the level of parallelism
 
-    let loadImageAgent : string -> Async<ImageInfo> = Unchecked.defaultof<_>
-    let apply3DEffectAgent : ImageInfo -> Async<ImageInfo> =  Unchecked.defaultof<_>
-    let saveImageAgent : ImageInfo -> Async<string> =  Unchecked.defaultof<_>
+    let parallelPipe (limit:int) (operation:'a -> Async<'b>)  =
+        let agent = parallelAgent limit operation
+        fun (job:'a) ->
+            agent.PostAndAsyncReply(fun replyChannel -> job, replyChannel)
 
-    // Step (8) compose the previous functions
-    //          - loadImageAgent, apply3DEffectAgent, saveImageAgent
-    let parallelPipeline :string -> Async<string> = Unchecked.defaultof<_>
+
+    let loadImageAgent = parallelPipe 2 loadImage
+    let apply3DEffectAgent = parallelPipe 2 apply3D
+    let saveImageAgent = parallelPipe 2 saveImage
+
+    let parallelPipeline = loadImageAgent >=> apply3DEffectAgent >=> saveImageAgent
 
     let parallelTransformImages() =
        let images = Directory.GetFiles(Environment.CurrentDirectory + @"/src/FunConcurrency/Images")
        for image in images do
-            parallelPipeline image |> Async.run (fun imageName -> printfn "Saved image %s" imageName)
+            parallelPipeline image |> AsyncEx.run (fun imageName -> printfn "Saved image %s" imageName)
 
-    // Testing
     parallelTransformImages()
+
+
+

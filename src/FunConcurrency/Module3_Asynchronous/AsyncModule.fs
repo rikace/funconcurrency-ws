@@ -1,19 +1,12 @@
 module FunConcurrency.Asynchronous.AsyncModule
 
 
-#if INTERACTIVE
-#load "../Common/Helpers.fs"
-#load "../Module3_Asynchronous/Async.fs"
-#r "System.Drawing.dll"
-#endif
-
 open System
-open System.Threading
 open System.Net
 open System.IO
-open FunConcurrency.Async.AsyncOperators
-open FunConcurrency
+open System.Threading.Tasks
 open FunConcurrency.AsyncCombinators
+open FunConcurrency
 
 type T = { Url : string }
 
@@ -60,53 +53,41 @@ xs
 
 
 // Step (1)
-// How can you handle exceptions in case of not existing URL?
-// TIP:    avoid to use a try-catch (try-with) block and check if there is an existing
-//         "Async" api that could help you
+// How can you handle the exception in case of not existing URL?
+// TIP:    avoid the try-catch block and check if there is an existing
+//         Async api that could help you
 //         In addition, you should still be able to branch logic in both the
 //         "success" and "failure" paths using the F# Result<_,_> type
-//
-// FIX THE CODE BELOW BY REMOVING THE "try-with" block with a more idiomatic approach
-// Tips: the build in "Result<_,_>" and "Choice*" types could be helpful. In this example,
-// use the "AsyncRes" type define below as building block
 
-// Extract the functionality into a "wrap" function
-
-type AsyncRes<'a> = Async<Result<'a, exn>>
 
 
 xs
-|> List.map(fun u -> try
-                        downloadAsync u.Url
-                     with
-                     | ex -> reraise())
+|> List.map(fun u -> AsyncRes.wrap (downloadAsync u.Url))
 |> Async.Parallel
 |> Async.RunSynchronously
-//|> Seq.iter (function
-//    | Ok data -> printfn "Succeeded"
-//    | Error exn -> printfn "Failed with %s" exn.Message)
-|> ignore
-
+|> Seq.iter (function
+    | Ok data -> printfn "Succeeded"
+    | Error exn -> printfn "Failed with %s" exn.Message)
 
 
 // Step (2)
-// How can you compose the "saveAsync" function at the end of the pipeline?
-// Example: downloadAsync >> "hanlde errors" >> saveFunction
-// TIP:  first attempt, a "map" function over async types could be useful, but it has to be
-//       adapted to the "type AsyncRes" type
+// How can you compose the "saveAsync" function at the end o the pipeline ?
+// Example: downloadAsync >> hanlde errors >> saveFunction
+// TIP:  first attempt, a "map" function that run async could be useful
 
 // TIP : define and use a new type that combines the Async and Result types,
-//       this type definition will be very useful for the composition of the coming functions
+//       this type definition will be very useful in composition of the voming function
+
+
+type AsyncRes<'a> = Async<Result<'a, exn>>
 
 xs
-|> List.map(fun u -> (* missing code, remove the "async.Return u" with the correct implementation *)
-                async.Return u) // THIS IS CONCEPTUAL CODE wrap (downloadAsync u.Url) |> map saveAsync)
+|> List.map(fun u -> AsyncRes.wrap (downloadAsync u.Url) |> AsyncRes.map saveAsync)
 |> Async.Parallel
 |> Async.RunSynchronously
-//|> Seq.iter (function
-//    | Ok data -> printfn "Succeeded"
-//    | Error exn -> printfn "Failed with %s" exn.Message)
-|> ignore
+|> Seq.iter (function
+    | Ok data -> printfn "Succeeded"
+    | Error exn -> printfn "Failed with %s" exn.Message)
 
 
 
@@ -114,55 +95,85 @@ xs
 // How can you compose the "downloadAsync" and "saveAsync" functions
 // in a more idiomatic way?
 // Example: downloadAsync >> saveFunction
-// TIP: start wrapping (or lifting) both the "downloadAsync" and "saveAsync" functions into a "type AsyncRes<_>" type
+// TIP: start wrapping (or lifting) both the "downloadAsync" and "saveAsync" function
 //      try to implement the map / bind/ flatMap function for the previously define type
 
-let downloadAsync' url : AsyncRes<string * string> =
-    // wrap the function "downloadAsync"
-    Unchecked.defaultof<_>
+let downloadAsync' url =
+    AsyncRes.wrap (async {
+        use client = new WebClient()
+        printfn "Downloading %s ..." url
+        let! data = client.DownloadStringTaskAsync(Uri(url)) |> Async.AwaitTask
+        return (url, data)
+    })
 
-let saveAsync' (url : string, data : string) : AsyncRes<string * string> =
+let saveAsync' (url : string, data : string) =
     let destination = url // fix here to change the file name generation as needed
-    // wrap the function "downloadAsync"
-    Unchecked.defaultof<_>
+    AsyncRes.wrap (async {
+        let fn =
+            [|
+                __SOURCE_DIRECTORY__
+                destination |> Seq.filter isAllowedInFileName |> String.Concat
+            |]
+            |> Path.Combine
+        printfn "saving %s ..." (Path.GetFileName destination)
+        use stream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.ReadWrite, 0x100)
+        use writer = new StreamWriter(stream)
+        do! writer.WriteAsync(data) |> Async.AwaitTask
+        return (url, data)
+        })
 
 
+let bind f g = f >> (AsyncRes.flatMap g)
+let downloadAndSave = AsyncRes.bind downloadAsync' saveAsync'
 
 
 // BONUS :
-// try to use the "kleisli" combinator, and then create the "fish" infix operator >=> to replace the "kleisli" function
+// try to use the "kleisli" combinators, and then create the "fish" infix operator >=> to replace the "kleisli" function
 // kleisli signature: (f:'a -> AsyncRes<'b>) (g:'b -> AsyncRes<'c>) (x:'a)
 
-let (>=>) (operation1:'a -> AsyncRes<'b>) (operation2:'b -> AsyncRes<'c>) (value:'a) : 'a -> AsyncRes<'c> = Unchecked.defaultof<_>
+let (>>=) f g = AsyncRes.flatMap g f
+let kleisli (f:'a -> AsyncRes<'b>) (g:'b -> AsyncRes<'c>) (x:'a) = (f x) >>= g
+let (>=>) (operation1:'a -> AsyncRes<'b>) (operation2:'b -> AsyncRes<'c>) (value:'a) =
+                                                                    operation1 value >>= operation2
 
-// let downloadAndSave = downloadAsync' >=> saveAsync'
+let downloadAndSave' = downloadAsync' >=> saveAsync'
 
+xs
+|> List.map(fun u -> downloadAndSave u.Url)
+|> Async.Parallel
+|> Async.RunSynchronously
+|> Seq.iter (function
+    | Ok data -> printfn "Succeeded"
+    | Error exn -> printfn "Failed with %s" exn.Message)
 
 
 // Step (4)
 // now that we have implemented the Bind function, let's implement a computation expression
 // https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions
 //
-// complete the Bind functions for the different siganutures.
-// in this example, it is important to define two Bind functions, as indicated below
+// complete the Bind functions respecting the function siganuture.
+// in this case, it is important to define two Bind functions, as indicated below
 // NOTE: you should be able to use any implementaion of the "download" & "save" function
 //       (the wrapped and no wrapped version)
 
 type AsyncResComputationExpression() =
 
-    member this.Bind(x: AsyncRes<'a>, f: 'a -> AsyncRes<'b>) : AsyncRes<'b> = Unchecked.defaultof<_>
+    member this.Bind(x: AsyncRes<'a>, f: 'a -> AsyncRes<'b>) : AsyncRes<'b> = async {
+        return! AsyncRes.flatMap f x   }
 
-    member this.Bind (m:Async<'a>, f:'a -> AsyncRes<'b>) : AsyncRes<'b> = Unchecked.defaultof<_>
+    member this.Bind (m:Async<'a>, f:'a -> AsyncRes<'b>) : AsyncRes<'b> =
+        AsyncRes.flatMap f (AsyncRes.wrap m)
 
-    member this.Bind(result : Result<'a, exn>, binder : 'a -> AsyncRes<'b>) : AsyncRes<'b> = Unchecked.defaultof<_>
+    member this.Bind(result : Result<'a, exn>, binder : 'a -> AsyncRes<'b>) : AsyncRes<'b> =
+        this.Bind(result |> async.Return, binder)
 
     member this.Delay(f) = f()
     member this.Return m = AsyncRes.retn m
     member this.ReturnFrom (m : AsyncRes<'a>) = m
     member this.Zero() : AsyncRes<unit> = this.Return()
 
-
-// Testing
+// Step (5)
+// uncompent the following code to verify that the CE works corretcly
 let asyncRes = AsyncResComputationExpression()
 
 let comp url = asyncRes {

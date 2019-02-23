@@ -1,5 +1,16 @@
 module FunConcurrency.AgentWebCrawler
 
+
+(*
+MODULE 1    Web-Crawler        (FunConcurrency.AgentWebCrawler)
+    BONUS        Error handling + supervision
+MODULE 2    Web-Crawler Parallel
+MODULE 3    Agent compoistion (FunConcurrency.MessagePassing.AgentPipeline) >=> (+ parallelism)
+MODULE 4    Async Combinators + Async/Error
+    BONUS        Comp Expression
+Module 5    Agent + RX
+*)
+
 #if INTERACTIVE
 #load "../Common/Helpers.fs"
 #load "../Asynchronous/Async.fs"
@@ -27,7 +38,6 @@ let extractLinks html =
         ] |> List.filter (fun x -> Regex(pattern2).IsMatch(x))
     links
 
-// Download Html/Page content
 let downloadContent (url : string) = async {
     try
         let req = WebRequest.Create(url) :?> HttpWebRequest
@@ -46,6 +56,185 @@ let downloadContent (url : string) = async {
     | _ -> return None
 }
 
+module SyncWebCrawler =
+
+    type Msg<'a, 'b> =
+    | Item of 'a
+    | Mailbox of Agent<Msg<'a, 'b>>
+    and ItemFilter<'a> = 'a -> bool
+
+    let cts = new CancellationTokenSource()
+
+    let httpRgx = new Regex(@"^(http|https|www)://.*$") // TODO threadlocal
+
+    // Creates a mailbox that synchronizes printing to the console (so
+    // that two calls to 'printfn' do not interleave when printing)
+    let printerAgent =
+        Agent.Start((fun inbox -> async {
+          while true do
+            let! msg = inbox.Receive()
+            match msg with
+            | Item(t) -> printfn "%s" t
+            | Mailbox(agent) -> failwith "no implemented"}), cancellationToken = cts.Token)
+
+    let fetchContetAgent (limit : int option) =
+        let token = cts.Token
+        let agent = Agent<Msg<string, string>>.Start((fun inbox ->
+            let rec loop (urls : Set<string>) (agents : Agent<_> list) = async {
+                let! msg = inbox.Receive()
+
+                match msg with
+                | Item(url) ->
+                    if urls |> Set.contains url |> not then
+                        let! content = downloadContent url
+                        content |> Option.iter(fun c ->
+                            for agent in agents do
+                                agent.Post (Item(c)))
+
+                        let urls' = (urls |> Set.add url)
+                        match limit with
+                        | Some l when urls' |> Seq.length >= l -> cts.Cancel()
+                        | _ -> return! loop urls' agents
+                    else return! loop urls agents
+                | Mailbox(agent) -> return! loop urls (agent::agents)
+            }
+            loop Set.empty []), cancellationToken = token)
+        token.Register(fun () -> (agent :> IDisposable).Dispose()) |> ignore
+        agent
+
+    let broadcastAgent () =
+        let token = cts.Token
+        let agent = Agent<Msg<string, string>>.Start((fun inbox ->
+            let rec loop (agents : Agent<_> list) = async {
+                let! msg = inbox.Receive()
+                match msg with
+                | Item(item) ->
+                    for agent in agents do
+                        agent.Post(Item(item))
+                    return! loop agents
+                | Mailbox(agent) -> return! loop (agent::agents)
+            }
+            loop []), cancellationToken = token)
+        token.Register(fun () -> (agent :> IDisposable).Dispose()) |> ignore
+        agent
+
+    let imageParserAgent () =
+        let token = cts.Token
+        let agent = Agent<Msg<string, string>>.Start((fun inbox ->
+            let rec loop (agents : Agent<Msg<string, string>> list) = async {
+                let! msg = inbox.Receive()
+                match msg with
+                | Item(html) ->
+                    let doc = new HtmlDocument()
+                    doc.LoadHtml(html)
+
+                    let imageLinks =
+                        doc.DocumentNode.Descendants("img")
+                        |> Seq.choose(fun n ->
+                            if n.Attributes.Contains("src") then
+                                n.GetAttributeValue("src", "") |> Some
+                            else None)
+                        |> Seq.filter(fun url -> httpRgx.IsMatch(url))
+
+                    for imgLink in imageLinks do
+                        agents |> Seq.iter(fun agent -> agent.Post (Item(imgLink)))
+
+                    return! loop agents
+                | Mailbox(agent) -> return! loop (agent::agents)
+            }
+            loop []), cancellationToken = token)
+        token.Register(fun () -> (agent :> IDisposable).Dispose()) |> ignore
+        agent
+
+    let linksParserAgent () =
+        let token = cts.Token
+        let agent = Agent<Msg<string, string>>.Start((fun inbox ->
+            let rec loop (agents : Agent<_> list) = async {
+                let! msg = inbox.Receive()
+                match msg with
+                | Item(html) ->
+                    let doc = new HtmlDocument()
+                    doc.LoadHtml(html)
+
+                    let links =
+                        doc.DocumentNode.Descendants("a")
+                        |> Seq.choose(fun n ->
+                            if n.Attributes.Contains("href") then
+                                n.GetAttributeValue("href", "") |> Some
+                            else None)
+                        |> Seq.filter(fun url -> httpRgx.IsMatch(url))
+
+                    for link in links do
+                        agents |> Seq.iter(fun agent -> agent.Post (Item(link)))
+
+                    return! loop agents
+                | Mailbox(agent) -> return! loop (agent::agents)
+            }
+            loop []), cancellationToken = token)
+        token.Register(fun () -> (agent :> IDisposable).Dispose()) |> ignore
+        agent
+
+    let comparison = StringComparison.InvariantCultureIgnoreCase
+    let linkFilter =
+        fun (link : string) ->
+            link.IndexOf(".aspx", comparison) <> -1 ||
+            link.IndexOf(".php", comparison) <> -1 ||
+            link.IndexOf(".htm", comparison) <> -1 ||
+            link.IndexOf(".html", comparison) <> -1
+
+    let imageSideEffet (f: string -> byte[] -> Async<unit>) =
+        let token = cts.Token
+        let agent = Agent<Msg<string, _>>.Start((fun inbox ->
+            let rec loop () = async {
+                let! msg = inbox.Receive()
+                match msg with
+                | Item(url) ->
+                    if linkFilter url then
+                        let client = new WebClient()
+                        let! buffer = client.DownloadDataTaskAsync(url) |> Async.AwaitTask
+                        do! f url buffer
+                | _ -> failwith "no implemented"
+                return! loop ()
+            }
+            loop ()), cancellationToken = token)
+        token.Register(fun () -> (agent :> IDisposable).Dispose()) |> ignore
+        agent
+
+    let saveImageAgent =
+        imageSideEffet (fun url buffer -> async {
+                let fileName = Path.GetFileName(url)
+                let name = @"Images\" + fileName
+                printfn "Name : %s" name
+                //use stream = File.OpenWrite(name)
+                //do! stream.AsyncWrite(buffer)
+            })
+
+    type WebCrawler (?limit) as this =
+        let fetchContetAgent = fetchContetAgent limit
+        let contentBroadcaster = broadcastAgent ()
+        let linkBroadcaster = broadcastAgent ()
+        let imageParserAgent = imageParserAgent ()
+        let linksParserAgent = linksParserAgent ()
+
+        do
+            fetchContetAgent.Post (Mailbox(contentBroadcaster))
+            contentBroadcaster.Post (Mailbox(imageParserAgent))
+            contentBroadcaster.Post (Mailbox(linksParserAgent))
+            contentBroadcaster.Post (Mailbox(printerAgent))
+            linkBroadcaster.Post (Mailbox(printerAgent))
+            imageParserAgent.Post (Mailbox(saveImageAgent))
+            linksParserAgent.Post (Mailbox(linkBroadcaster))
+            linkBroadcaster.Post (Mailbox(saveImageAgent))
+            linkBroadcaster.Post (Mailbox(fetchContetAgent))
+
+        member __.Submit(url : string) = fetchContetAgent.Post(Item(url))
+
+        member __.Dispose() = cts.Cancel()
+
+        interface IDisposable with
+            member x.Dispose() = this.Dispose()
+
+
 module ParallelWebCrawler =
 
     type Msg<'a, 'b> =
@@ -54,9 +243,11 @@ module ParallelWebCrawler =
 
     let cts = new CancellationTokenSource()
 
-    let [<Literal>] parallelism = 4 // can be any arbitrary value
+    let [<Literal>] parallelism = 4
 
-    let httpRgx = new Regex(@"^(http|https|www)://.*$")
+    let httpRgx =
+        // TODO
+        new ThreadLocal<Regex>(fun () -> new Regex(@"^(http|https|www)://.*$"))
 
     let sites = [
        "http://cnn.com/";          "http://bbc.com/";
@@ -67,43 +258,36 @@ module ParallelWebCrawler =
        "http://www.yahoo.com";     "http://www.amazon.com"
        "http://news.yahoo.com";    "http://www.microsoft.com"; ]
 
-    // Step (1) create an Agent that prints the messages.
-    //    this is important in parallel computations that print some output
-    //    to keep the console in a readable state
-    let printerAgent =
-        Agent.Start((fun (inbox : Agent<Msg<string, unit>>) -> async {
-
-
-          // MISSING CODE
-          return! async.Return ()  // << replace this line with implementation
-          }), cancellationToken = cts.Token)
-
-    // Test
-    printerAgent.Post (Item "Hello from printerAgent!!")
-
-    // Step (2)
+    // Step (1)
     //     create a "parallelAgent" worker based on the MailboxPorcerssor.
-    //     the idea is to have an Agent that handles, computes and distributes the messages
-    //     in a Round-Robin fashion between a set of (intern and pre-instantiated) Agent-children
+    //     the idea is to have an Agent that handles, computes and distributes the messages in a Round-Robin fashion
+    //     between a set of (intern and pre-instantiated) Agent children
     //
-    //     This is important in the case of async computaions, so you can achieve great throughput
+    //     This is important in the case of async computaions, so you can reach great throughput
     //     If already completed the "Agent Pipeline" lab, then feel free to use the "parallelAgent" already created
 
-    let parallelAgent (degreeOfParallelism : int) (f: MailboxProcessor<Msg<'a, 'b>> -> Async<unit>) =
+    let parallelAgent n f =
+        // MISSING CODE HERE
+        let agents = Array.init n (fun _ ->
+            Agent<Msg<'a, 'b>>.Start(f, cancellationToken = cts.Token))
+
         let token = cts.Token
 
-        // MISSING CODE HERE
-        // 1 - use the "Array" module to initalize an array of Agents
-        let agents = Unchecked.defaultof<MailboxProcessor<_> []> // << replace this line with implementation
-
-        // 2 - crete an agent that broadcasts the messages received
-        //     in a Round-Robin fashion between the agents created in the  previous point
         let agent = new Agent<Msg<'a, 'b>>((fun inbox ->
             let rec loop index = async {
                 let! msg = inbox.Receive()
-                // MISSING CODE HERE
+                match msg with
+                | Msg.Item(item) ->
+                    agents.[index].Post (Item item)
 
-                return! loop index
+
+
+                    return! loop ((index + 1) % n)
+
+
+                | Mailbox(agent) ->
+                    agents |> Seq.iter(fun a -> a.Post (Mailbox agent))
+                    return! loop ((index + 1) % n)
             }
             loop 0), cancellationToken = token)
 
@@ -111,15 +295,27 @@ module ParallelWebCrawler =
         agent.Start()
         agent
 
+    // Step (2) create an Agent that prints the messages received
+    //    this is important in parallel computations that print some output
+    //    to keep the console in a readable state
+    let printerAgent =
+        Agent<Msg<string, string>>.Start((fun inbox -> async {
+          while true do
+            let! msg = inbox.Receive()
+            match msg with
+            | Item(t) -> printfn "%s" t
+            | Mailbox(agent) -> failwith "no implemented"}), cancellationToken = cts.Token)
+
     // Step (3) complete the "Item(url)" case
     let fetchContetAgent (limit : int option) =
-        parallelAgent parallelism (fun (inbox : MailboxProcessor<_>) ->
+        parallelAgent parallelism (fun inbox ->
             let rec loop (urls : Set<string>) (agents : Agent<_> list) = async {
                 let! msg = inbox.Receive()
 
                 match msg with
                 | Item(url) ->
-                    // check if the content of the "url" has been already downloaded.
+                    // check if the content of the "url" has been alredy
+                    // downloaded.
                     // if not then
                     //     downloaded the content (use the function "downloadContent")
                     //     and print (using the "printerAgent") a message that the "content of url %s hes been downloaded"
@@ -128,18 +324,21 @@ module ParallelWebCrawler =
                     //               the registration is done using the "Mailbox(agent)" message/case.
                     //               The list of agent subscribed is kept as state of the agent loop (agents : Agent<_> list)
                     // else
-                    //     do nothing
-                    //
+                    //     nothing
                     // verify if the limit of the Urls downloaded is reached, and stop the process accordingly
                     // (keep in mind that the "limit" is an option type (if None then the process is limiteless)
 
-                    return! loop urls agents
-
-                // the "Msg<_,_>" case is not completed.
-                // finish the code covering the missing "Msg<_,_>" cases.
-                // this missing case is resposible to register the Agents (passed as message)
-                // into the current Agent body.
-
+                    if urls |> Set.contains url |> not then
+                        let! content = downloadContent url
+                        content |> Option.iter(fun c ->
+                            for agent in agents do
+                                agent.Post (Item(c)))
+                        let urls' = (urls |> Set.add url)
+                        match limit with
+                        | Some l when urls' |> Seq.length >= l -> cts.Cancel()
+                        | _ -> return! loop urls' agents
+                    else return! loop urls agents
+                | Mailbox(agent) -> return! loop urls (agent::agents)
             }
             loop Set.empty [])
 
@@ -152,24 +351,23 @@ module ParallelWebCrawler =
     testFetchContetAgent()
 
 
-    // Step (4)  create a broadcast agent, which simply broadcasts (forward)
-    //           the messages received to all the agents subscribed
+    // Step (4)  create a broadcast agent, which simply broadcasts
+    //           the messages received to all the agent subscribed
     //     Bonus:    would be nice to have a filter in place to select
     //               which agent receives which message (no required)
     let broadcastAgent () =
         parallelAgent parallelism (fun inbox ->
             let rec loop (agents : Agent<_> list) = async {
                 let! msg = inbox.Receive()
-
-                // The content is passed (broadcast) as message to all the agents subscribed.
-                // The registration is done using the "Mailbox(agent)" message/case.
+                match msg with
+                // the content is passed (broadcast) as message to all the agents subscribed to this agent.
+                // the registration is done using the "Mailbox(agent)" message/case.
                 // The list of agent subscribed is kept as state of the agent loop (agents : Agent<_> list)
-
-                // MISSING CODE
-
-                // match msg with
-
-                return! loop agents // << this line should be replaced with correct implementation
+                | Item(item) ->
+                    for agent in agents do
+                        agent.Post(Item(item))
+                    return! loop agents
+                | Mailbox(agent) -> return! loop (agent::agents)
             }
             loop [])
 
@@ -181,10 +379,37 @@ module ParallelWebCrawler =
 
     testBroadcastAgent1()
 
+
+    let imageParserAgent () =
+        parallelAgent parallelism (fun inbox ->
+            let rec loop (agents : Agent<Msg<string, string>> list) = async {
+                let! msg = inbox.Receive()
+                match msg with
+                | Item(html) ->
+                    let doc = new HtmlDocument()
+                    doc.LoadHtml(html)
+
+                    let imageLinks =
+                        doc.DocumentNode.Descendants("img")
+                        |> Seq.choose(fun n ->
+                            if n.Attributes.Contains("src") then
+                                n.GetAttributeValue("src", "") |> Some
+                            else None)
+                        |> Seq.filter(fun url -> httpRgx.Value.IsMatch(url))
+
+                    for imgLink in imageLinks do
+                        agents |> Seq.iter(fun agent -> agent.Post (Item(imgLink)))
+
+                    return! loop agents
+                | Mailbox(agent) -> return! loop (agent::agents)
+            }
+            loop [])
+
+
     // Step (5)  Implement a "link" agent parser.
-    //           - the message "Mailbox(agent)" subscribes agent(s)
-    //           - the message "Item(url)" to delivers an url to process
-    //
+    //           Following the same idea from the previous agents,
+    //           using the messages "Mailbox(agent)" to subscribe agent(s), and the message
+    //           "Item(url)" to deliver an url to process,
     //           implement an agent that extract the "href" tags from a web page
     //           and send the reference (href) to the Agent subscribed  as link
     let linksParserAgent () =
@@ -193,7 +418,6 @@ module ParallelWebCrawler =
                 let! msg = inbox.Receive()
                 match msg with
                 | Item(html) ->
-
                     let doc = new HtmlDocument()
                     doc.LoadHtml(html)
 
@@ -203,21 +427,15 @@ module ParallelWebCrawler =
                             if n.Attributes.Contains("href") then
                                 n.GetAttributeValue("href", "") |> Some
                             else None)
-                        |> Seq.filter(fun url -> httpRgx.IsMatch(url)) // NOTE, IS THIS CORRECT ??
+                        |> Seq.filter(fun url -> httpRgx.Value.IsMatch(url))
 
-                    // broadcast the links extracted to all the "agents" subscribed
-                    // (use the "Item" case to send the "link" extracted
-                    // Missing code
+                    for link in links do
+                        agents |> Seq.iter(fun agent -> agent.Post (Item(link)))
 
                     return! loop agents
-                // Add the missing case to register/subscribe Agents
-                // | ...
+                | Mailbox(agent) -> return! loop (agent::agents)
             }
             loop [])
-
-
-    // imageParserAgent implementation will be pushed on github after the
-    // implementation of the "linksParserAgent"
 
     let comparison = StringComparison.InvariantCultureIgnoreCase
     let linkFilter =
@@ -243,32 +461,36 @@ module ParallelWebCrawler =
             loop ())
 
     // Step (6)
-    // complete the "side effect" function.
-    // For example, you could just print the image name downloaded and/or save it to the file-system
-    let saveImageAgent : Agent<Msg<string, unit>> =
+    // complete the "side effect" function as you widh
+    // you could just print the image name downloaded and/or save it to the file-system
+    let saveImageAgent =
         imageSideEffet (fun url buffer -> async {
                 let fileName = Path.GetFileName(url)
                 let name = @"Images\" + fileName
-
-                // Missing code
-                ()
+                printfn "Name : %s" name
+                //use stream = File.OpenWrite(name)
+                //do! stream.AsyncWrite(buffer)
             })
 
     type WebCrawler (?limit) as this =
         let fetchContetAgent = fetchContetAgent limit
         let contentBroadcaster = broadcastAgent ()
         let linkBroadcaster = broadcastAgent ()
+        let imageParserAgent = imageParserAgent ()
         let linksParserAgent = linksParserAgent ()
 
-        //   remove comment below
-        //   let imageParserAgent = imageParserAgent ()
-
         // Step (6)
-        // Register/subscribe the agents to compose and run the Web-Crawler
+        // Register/subscribe the agent to compose and run the Web-Crawler
         do
             fetchContetAgent.Post     (Mailbox(contentBroadcaster))
-
-            // MISSING CODE for registration
+            contentBroadcaster.Post   (Mailbox(imageParserAgent))
+            contentBroadcaster.Post   (Mailbox(linksParserAgent))
+            contentBroadcaster.Post   (Mailbox(printerAgent))
+            linkBroadcaster.Post      (Mailbox(printerAgent))
+            imageParserAgent.Post     (Mailbox(saveImageAgent))
+            linksParserAgent.Post     (Mailbox(linkBroadcaster))
+            linkBroadcaster.Post      (Mailbox(saveImageAgent))
+            linkBroadcaster.Post      (Mailbox(fetchContetAgent))
 
         member __.Submit(url : string) = fetchContetAgent.Post(Item(url))
 
@@ -276,16 +498,3 @@ module ParallelWebCrawler =
 
         interface IDisposable with
             member x.Dispose() = this.Dispose()
-
-// BONUS
-// what happen if an error is thrown ??
-// we could use the Agent build in functionality for Error
-// propagation to do something, like logging or recovering from errors
-
-type MailboxProcessor<'T> with
-    member inline this.withSupervisor (supervisor: Agent<exn>, transform) =
-        this.Error.Add(fun error -> supervisor.Post(transform(error))); this
-
-    member this.withSupervisor (supervisor: Agent<exn>) =
-        this.Error.Add(supervisor.Post); this
-

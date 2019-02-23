@@ -63,16 +63,33 @@ module ReactiveAgent =
 
             loop (State<'U>.empty()) seed)
 
+        /// Raises OnNext in all the observers
+        member x.Next value  = Message.Next(value)  |> mbox.Post
+        /// Raises OnError in all the observers
+        member x.Error ex    = Message.Error(ex)    |> mbox.Post
+        /// Raises OnCompleted in all the observers
+        member x.Completed() = Message.Completed    |> mbox.Post
+
         // Step (1)
         // Implement both the reactive interfaces IObserver and IObservable, also pay attention to the generic
-        // type constractor for these intefaces, they might not be the same.
-        // Then, expose the IObservable interface throughout an instance method called "AsObservable".
+        // type constarctor for these intefaces, they might not be the same.
+        // Then, expose the IObservable interface throughout an instance method called "AsObservable". This methid will be used
+        // to register the output after each message is processed.
+        interface IObserver<'T> with
+            member x.OnNext value   = x.Next(value)
+            member x.OnError ex     = x.Error(ex)
+            member x.OnCompleted()  = x.Completed()
 
-        /// somthing like :        member x.AsObservable() = (x :> IObservable<'U>)
+        interface IObservable<'U> with
+            member x.Subscribe(observer:IObserver<'U>) =
+                observer |> Message.Add |> mbox.Post
+                { new IDisposable with
+                    member x.Dispose() =
+                        observer |> Message.Remove |> mbox.Post }
 
-        // Step (2)
-        // modify the "AgentWebCrawler" in "Module1_WebCrawler" to register and dispatch the
-        // messages to the "sub-agents" as IObserver(s)
-        //
-        // Then, you could use the Reactive higher-order operators to filter, aggregate and ...
-        // to the outputs
+        interface IAgent<'T, 'U> with
+            member x.Post(msg) = Message.Next(msg)  |> mbox.Post
+            member x.Send(msg) = async { Message.Next(msg)  |> mbox.Post } |> Async.startAsPlainTask
+            member x.AsObservable() = x.AsObservable()
+
+        member x.AsObservable() = (x :> IObservable<'U>)
