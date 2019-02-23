@@ -103,12 +103,7 @@ module ParallelWebCrawler =
                 match msg with
                 | Msg.Item(item) ->
                     agents.[index].Post (Item item)
-
-
-
                     return! loop ((index + 1) % n)
-
-
                 | Mailbox(agent) ->
                     agents |> Seq.iter(fun a -> a.Post (Mailbox agent))
                     return! loop ((index + 1) % n)
@@ -166,24 +161,26 @@ module ParallelWebCrawler =
     //               which agent receives which message (no required)
     let broadcastAgent () =
         parallelAgent parallelism (fun inbox ->
-            let rec loop (agents : Agent<_> list) = async {
+            let rec loop (agents : Agent<Msg<_,_>> list) = async {
                 let! msg = inbox.Receive()
-
-                // The content is passed (broadcast) as message to all the agents subscribed.
-                // The registration is done using the "Mailbox(agent)" message/case.
+                match msg with
+                // the content is passed (broadcast) as message to all the agents subscribed to this agent.
+                // the registration is done using the "Mailbox(agent)" message/case.
                 // The list of agent subscribed is kept as state of the agent loop (agents : Agent<_> list)
+                | Item(item) ->
+                    for agent in agents do
+                        agent.Post(Item(item))
+                    return! loop agents
 
-                // MISSING CODE
-
-                // match msg with
-
-                return! loop agents // << this line should be replaced with correct implementation
+                | Mailbox(agent) -> return! loop (agent::agents)
             }
             loop [])
+
 
     // Testing
     let testBroadcastAgent1() =
         let brcast = broadcastAgent()
+        brcast.Post (Mailbox(printerAgent))
         brcast.Post (Mailbox(printerAgent))
         for site in sites do brcast.Post (Item site)
 
