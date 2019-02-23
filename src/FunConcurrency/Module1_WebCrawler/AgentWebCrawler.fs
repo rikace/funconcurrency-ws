@@ -71,12 +71,13 @@ module ParallelWebCrawler =
     //    this is important in parallel computations that print some output
     //    to keep the console in a readable state
     let printerAgent =
-        Agent.Start((fun (inbox : Agent<Msg<string, unit>>) -> async {
+        Agent<Msg<string, string>>.Start((fun inbox -> async {
+          while true do
+            let! msg = inbox.Receive()
+            match msg with
+            | Item(t) -> printfn "%s" t
+            | Mailbox(agent) -> failwith "no implemented"}), cancellationToken = cts.Token)
 
-
-          // MISSING CODE
-          return! async.Return ()  // << replace this line with implementation
-          }), cancellationToken = cts.Token)
 
     // Test
     printerAgent.Post (Item "Hello from printerAgent!!")
@@ -89,21 +90,28 @@ module ParallelWebCrawler =
     //     This is important in the case of async computaions, so you can achieve great throughput
     //     If already completed the "Agent Pipeline" lab, then feel free to use the "parallelAgent" already created
 
-    let parallelAgent (degreeOfParallelism : int) (f: MailboxProcessor<Msg<'a, 'b>> -> Async<unit>) =
+    let parallelAgent n f =
+        // MISSING CODE HERE
+        let agents = Array.init n (fun _ ->
+            Agent<Msg<'a, 'b>>.Start(f, cancellationToken = cts.Token))
+
         let token = cts.Token
 
-        // MISSING CODE HERE
-        // 1 - use the "Array" module to initalize an array of Agents
-        let agents = Unchecked.defaultof<MailboxProcessor<_> []> // << replace this line with implementation
-
-        // 2 - crete an agent that broadcasts the messages received
-        //     in a Round-Robin fashion between the agents created in the  previous point
         let agent = new Agent<Msg<'a, 'b>>((fun inbox ->
             let rec loop index = async {
                 let! msg = inbox.Receive()
-                // MISSING CODE HERE
+                match msg with
+                | Msg.Item(item) ->
+                    agents.[index].Post (Item item)
 
-                return! loop index
+
+
+                    return! loop ((index + 1) % n)
+
+
+                | Mailbox(agent) ->
+                    agents |> Seq.iter(fun a -> a.Post (Mailbox agent))
+                    return! loop ((index + 1) % n)
             }
             loop 0), cancellationToken = token)
 
