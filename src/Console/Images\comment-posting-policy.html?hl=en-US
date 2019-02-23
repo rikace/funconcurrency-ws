@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html class="google-nojs play-intl" lang="pl">
+  <head>
+    <meta charset="utf-8">
+    <meta content="initial-scale=1, minimum-scale=1, width=device-width" name="viewport">
+    <title>
+      Google Play
+    </title>
+    <link href="/about/css/legal.css" rel="stylesheet">
+    <link href="/about/images/favicon.ico" rel="shortcut icon">
+    <script src="//www.google.com/js/google.js"></script>
+    <script>
+    new gweb.analytics.AutoTrack({
+        profile: 'UA-19995902-1'
+      });
+
+      new gweb.analytics.AutoTrack({
+        profile: 'UA-30283356-1',
+        tracker: 'second'
+      });
+    </script>
+  </head>
+  <body id="play-comment-posting-policy.html">
+    <div id="play-header">
+      <div class="play-contained">
+        <h1>
+          <a class="cta-to-product" href="https://play.google.com/" id="product-cta"><img alt=
+          "Google Play" src=
+          "https://www.gstatic.com/android/market_images/web/play_prism_hlock_2x.png"></a>
+        </h1>
+      </div>
+    </div>
+    <div class="play-contained">
+      <h1>
+        Zasady publikowania komentarzy
+      </h1>
+      <p>
+        Komentując aplikację, przestrzegaj tych zasad:
+      </p>
+      <ul>
+        <li>Pisz na temat. Komentarz powinien dotyczyć odpowiedniej aplikacji.
+        </li>
+        <li>Nie umieszczaj w swoich komentarzach linków, adresów mailowych oraz kodów do gier i
+        produktów partnerskich.
+        </li>
+        <li>Nie publikuj fałszywych opinii, by podwyższyć lub obniżyć ocenę.
+        </li>
+        <li>Nie publikuj treści, które mają charakter jednoznacznie seksualny lub zawierają
+        bluźnierstwa bądź wulgaryzmy.
+        </li>
+        <li>Nie publikuj treści obraźliwych, szerzących nienawiść, zawierających groźby lub
+        mających na celu nękanie.
+        </li>
+        <li>Nie podszywaj się pod inną osobę ani nie składaj nieprawdziwych oświadczeń co do swoich
+        powiązań z&nbsp;określoną osobą lub podmiotem ani nie sugeruj tego w&nbsp;inny sposób,
+        jeśli takie powiązania nie istnieją.
+        </li>
+        <li>Nie publikuj danych osobowych ani informacji poufnych innych osób, w&nbsp;tym m.in.
+        adresu pocztowego czy numeru prawa jazdy, ani żadnych innych informacji, które nie są
+        powszechnie dostępne.
+        </li>
+      </ul>
+      <p>
+        Możesz też skorzystać z&nbsp;tych wytycznych i&nbsp;wskazówek:
+      </p>
+      <ul>
+        <li>Tekst powinien być czytelny, dlatego nie nadużywaj wielkich liter ani znaków
+        interpunkcyjnych.
+        </li>
+        <li>Publikuj informacje zrozumiałe, przydatne i&nbsp;zgodne z&nbsp;prawdą.
+        </li>
+        <li>Warto wymienić zarówno zalety, jak i&nbsp;wady aplikacji.
+        </li>
+        <li>Grzecznie odnoś się do innych osób i&nbsp;ich nie atakuj.
+        </li>
+        <li>Poprawnie formułuj zdania i&nbsp;sprawdzaj pisownię.
+        </li>
+        <li>Komentarze powinny zawierać informacje przydatne dla innych użytkowników.
+        </li>
+      </ul>
+    </div>
+    <div id="play-footer">
+      <div class="play-contained">
+        <ul>
+          <li>© <a href="https://www.google.pl">Google</a>
+          </li>
+          <li>
+            <a href="https://www.google.pl/intl/pl/policies/privacy/">Prywatność i&nbsp;warunki</a>
+          </li>
+          <li>
+            <a href="https://support.google.com/mobile/?p=play_faq&amp;hl=pl">Pomoc</a>
+          </li>
+        </ul><label><span>Zmień język lub region:</span> <select onchange=
+        "var href=this[this.selectedIndex].value;if(href!=''){window.location.href=href};">
+          <option value="/intl/id_id/about/comment-posting-policy.html">
+            Bahasa Indonesia – Indonesia
+          </option>
+          <option value="/intl/bs_ba/about/comment-posting-policy.html">
+            Bosanski – Bosna i Hercegovina
+          </option>
+          <option value="/intl/ca_es/about/comment-posting-policy.html">
+            Català – Espanya
+          </option>
+          <option value="/intl/cs_cz/about/comment-posting-policy.html">
+            Čeština – Česká republika
+          </option>
+          <option value="/intl/da_dk/about/comment-posting-policy.html">
+            Dansk – Danmark
+          </option>
+          <option value="/intl/de_be/about/comment-posting-policy.html">
+            Deutsch – Belgien
+          </option>
+          <option value="/intl/de_de/about/comment-posting-policy.html">
+            Deutsch – Deutschland
+          </option>
+          <option value="/intl/de_li/about/comment-posting-policy.html">
+            Deutsch – Liechtenstein
+          </option>
+          <option value="/intl/de_lu/about/comment-posting-policy.html">
+            Deutsch – Luxemburg
+          </option>
+          <option value="/intl/de_at/about/comment-posting-policy.html">
+            Deutsch – Österreich
+          </option>
+          <option value="/intl/de_ch/about/comment-posting-policy.html">
+            Deutsch – Schweiz
+          </option>
+          <option value="/intl/et_ee/about/comment-posting-policy.html">
+            Eesti – Eesti
+          </option>
+          <option value="/intl/en/about/comment-posting-policy.html">
+            English
+          </option>
+          <option value="/intl/en_as/about/comment-posting-policy.html">
+            English – American Samoa
+          </option>
+          <option value="/intl/en_ag/about/comment-posting-policy.html">
+            English – Antigua and Barbuda
+          </option>
+          <option value="/intl/en_au/about/comment-posting-policy.html">
+            English – Australia
+          </option>
+          <option value="/intl/en_bs/about/comment-posting-policy.html">
+            English – Bahamas
+          </option>
+          <option value="/intl/en_bh/about/comment-posting-policy.html">
+            English – Bahrain
+          </option>
+          <option value="/intl/en_bz/about/comment-posting-policy.html">
+            English – Belize
+          </option>
+          <option value="/intl/en_bw/about/comment-posting-policy.html">
+            English – Botswana
+          </option>
+          <option value="/intl/en_kh/about/comment-posting-policy.html">
+            English – Cambodia
+          </option>
+          <option value="/intl/en_cm/about/comment-posting-policy.html">
+            English – Cameroon
+          </option>
+          <option value="/intl/en_ca/about/comment-posting-policy.html">
+            English – Canada
+          </option>
+          <option value="/intl/en_cy/about/comment-posting-policy.html">
+            English – Cyprus
+          </option>
+          <option value="/intl/en_eg/about/comment-posting-policy.html">
+            English – Egypt
+          </option>
+          <option value="/intl/en_fj/about/comment-posting-policy.html">
+            English – Fiji
+          </option>
+          <option value="/intl/en_gu/about/comment-posting-policy.html">
+            English – Guam
+          </option>
+          <option value="/intl/en_hk/about/comment-posting-policy.html">
+            English – Hong Kong
+          </option>
+          <option value="/intl/en_is/about/comment-posting-policy.html">
+            English – Iceland
+          </option>
+          <option value="/intl/en_in/about/comment-posting-policy.html">
+            English – India
+          </option>
+          <option value="/intl/en_ie/about/comment-posting-policy.html">
+            English – Ireland
+          </option>
+          <option value="/intl/en_il/about/comment-posting-policy.html">
+            English – Israel
+          </option>
+          <option value="/intl/en_it/about/comment-posting-policy.html">
+            English – Italy
+          </option>
+          <option value="/intl/en_jo/about/comment-posting-policy.html">
+            English – Jordan
+          </option>
+          <option value="/intl/en_kw/about/comment-posting-policy.html">
+            English – Kuwait
+          </option>
+          <option value="/intl/en_lb/about/comment-posting-policy.html">
+            English – Lebanon
+          </option>
+          <option value="/intl/en_mh/about/comment-posting-policy.html">
+            English – Marshall Islands
+          </option>
+          <option value="/intl/en_mu/about/comment-posting-policy.html">
+            English – Mauritius
+          </option>
+          <option value="/intl/en_na/about/comment-posting-policy.html">
+            English – Namibia
+          </option>
+          <option value="/intl/en_np/about/comment-posting-policy.html">
+            English – Nepal
+          </option>
+          <option value="/intl/en_nz/about/comment-posting-policy.html">
+            English – New Zealand
+          </option>
+          <option value="/intl/en_mp/about/comment-posting-policy.html">
+            English – Northern Mariana Islands
+          </option>
+          <option value="/intl/en_om/about/comment-posting-policy.html">
+            English – Oman
+          </option>
+          <option value="/intl/en_pw/about/comment-posting-policy.html">
+            English – Palau
+          </option>
+          <option value="/intl/en_pg/about/comment-posting-policy.html">
+            English – Papua New Guinea
+          </option>
+          <option value="/intl/en_ph/about/comment-posting-policy.html">
+            English – Philippines
+          </option>
+          <option value="/intl/en_qa/about/comment-posting-policy.html">
+            English – Qatar
+          </option>
+          <option value="/intl/en_rw/about/comment-posting-policy.html">
+            English – Rwanda
+          </option>
+          <option value="/intl/en_sa/about/comment-posting-policy.html">
+            English – Saudi Arabia
+          </option>
+          <option value="/intl/en_sg/about/comment-posting-policy.html">
+            English – Singapore
+          </option>
+          <option value="/intl/en_za/about/comment-posting-policy.html">
+            English – South Africa
+          </option>
+          <option value="/intl/en_lk/about/comment-posting-policy.html">
+            English – Sri Lanka
+          </option>
+          <option value="/intl/en_ch/about/comment-posting-policy.html">
+            English – Switzerland
+          </option>
+          <option value="/intl/en_tz/about/comment-posting-policy.html">
+            English – Tanzania
+          </option>
+          <option value="/intl/en_tt/about/comment-posting-policy.html">
+            English – Trinidad and Tobago
+          </option>
+          <option value="/intl/en_vi/about/comment-posting-policy.html">
+            English – U.S. Virgin Islands
+          </option>
+          <option value="/intl/en_ug/about/comment-posting-policy.html">
+            English – Uganda
+          </option>
+          <option value="/intl/en_ae/about/comment-posting-policy.html">
+            English – United Arab Emirates
+          </option>
+          <option value="/intl/en_uk/about/comment-posting-policy.html">
+            English – United Kingdom
+          </option>
+          <option value="/intl/en_us/about/comment-posting-policy.html">
+            English – United States
+          </option>
+          <option value="/intl/en_zm/about/comment-posting-policy.html">
+            English – Zambia
+          </option>
+          <option value="/intl/en_zw/about/comment-posting-policy.html">
+            English – Zimbabwe
+          </option>
+          <option value="/intl/es_es/about/comment-posting-policy.html">
+            Español – España
+          </option>
+          <option value="/intl/es_us/about/comment-posting-policy.html">
+            Español – Estados Unidos
+          </option>
+          <option value="/intl/es_gu/about/comment-posting-policy.html">
+            Español – Guam
+          </option>
+          <option value="/intl/es_as/about/comment-posting-policy.html">
+            Español – Samoa Americana
+          </option>
+          <option value="/intl/es-419_ar/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Argentina
+          </option>
+          <option value="/intl/es-419_bo/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Bolivia
+          </option>
+          <option value="/intl/es-419_cl/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Chile
+          </option>
+          <option value="/intl/es-419_co/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Colombia
+          </option>
+          <option value="/intl/es-419_cr/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Costa Rica
+          </option>
+          <option value="/intl/es-419_cu/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Cuba
+          </option>
+          <option value="/intl/es-419_ec/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Ecuador
+          </option>
+          <option value="/intl/es-419_sv/about/comment-posting-policy.html">
+            Español (Latinoamérica) – El Salvador
+          </option>
+          <option value="/intl/es-419_us/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Estados Unidos
+          </option>
+          <option value="/intl/es-419_gt/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Guatemala
+          </option>
+          <option value="/intl/es-419_hn/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Honduras
+          </option>
+          <option value="/intl/es-419_mx/about/comment-posting-policy.html">
+            Español (Latinoamérica) – México
+          </option>
+          <option value="/intl/es-419_ni/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Nicaragua
+          </option>
+          <option value="/intl/es-419_pa/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Panamá
+          </option>
+          <option value="/intl/es-419_py/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Paraguay
+          </option>
+          <option value="/intl/es-419_pe/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Perú
+          </option>
+          <option value="/intl/es-419_pr/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Puerto Rico
+          </option>
+          <option value="/intl/es-419_do/about/comment-posting-policy.html">
+            Español (Latinoamérica) – República Dominicana
+          </option>
+          <option value="/intl/es-419_uy/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Uruguay
+          </option>
+          <option value="/intl/es-419_ve/about/comment-posting-policy.html">
+            Español (Latinoamérica) – Venezuela
+          </option>
+          <option value="/intl/fr_be/about/comment-posting-policy.html">
+            Français – Belgique
+          </option>
+          <option value="/intl/fr_bj/about/comment-posting-policy.html">
+            Français – Bénin
+          </option>
+          <option value="/intl/fr_bf/about/comment-posting-policy.html">
+            Français – Burkina Faso
+          </option>
+          <option value="/intl/fr_kh/about/comment-posting-policy.html">
+            Français – Cambodge
+          </option>
+          <option value="/intl/fr_cm/about/comment-posting-policy.html">
+            Français – Cameroun
+          </option>
+          <option value="/intl/fr_ca/about/comment-posting-policy.html">
+            Français – Canada
+          </option>
+          <option value="/intl/fr_ci/about/comment-posting-policy.html">
+            Français – Côte d’Ivoire
+          </option>
+          <option value="/intl/fr_fr/about/comment-posting-policy.html">
+            Français – France
+          </option>
+          <option value="/intl/fr_ga/about/comment-posting-policy.html">
+            Français – Gabon
+          </option>
+          <option value="/intl/fr_lu/about/comment-posting-policy.html">
+            Français – Luxembourg
+          </option>
+          <option value="/intl/fr_ml/about/comment-posting-policy.html">
+            Français – Mali
+          </option>
+          <option value="/intl/fr_mu/about/comment-posting-policy.html">
+            Français – Maurice
+          </option>
+          <option value="/intl/fr_ne/about/comment-posting-policy.html">
+            Français – Niger
+          </option>
+          <option value="/intl/fr_sn/about/comment-posting-policy.html">
+            Français – Sénégal
+          </option>
+          <option value="/intl/fr_ch/about/comment-posting-policy.html">
+            Français – Suisse
+          </option>
+          <option value="/intl/fr_tg/about/comment-posting-policy.html">
+            Français – Togo
+          </option>
+          <option value="/intl/hr_hr/about/comment-posting-policy.html">
+            Hrvatski – Hrvatska
+          </option>
+          <option value="/intl/it_it/about/comment-posting-policy.html">
+            Italiano – Italia
+          </option>
+          <option value="/intl/lv_lv/about/comment-posting-policy.html">
+            Latviešu – Latvija
+          </option>
+          <option value="/intl/lt_lt/about/comment-posting-policy.html">
+            Lietuvių – Lietuva
+          </option>
+          <option value="/intl/hu_hu/about/comment-posting-policy.html">
+            Magyar – Magyarország
+          </option>
+          <option value="/intl/mt_mt/about/comment-posting-policy.html">
+            Malti – Malta
+          </option>
+          <option value="/intl/nl_aw/about/comment-posting-policy.html">
+            Nederlands – Aruba
+          </option>
+          <option value="/intl/nl_be/about/comment-posting-policy.html">
+            Nederlands – België
+          </option>
+          <option value="/intl/nl_nl/about/comment-posting-policy.html">
+            Nederlands – Nederland
+          </option>
+          <option value="/intl/no_no/about/comment-posting-policy.html">
+            Norsk – Norge
+          </option>
+          <option selected value="/intl/pl_pl/about/comment-posting-policy.html">
+            Polski – Polska
+          </option>
+          <option value="/intl/pt-BR_br/about/comment-posting-policy.html">
+            Português (Brasil) – Brasil
+          </option>
+          <option value="/intl/pt-PT_ao/about/comment-posting-policy.html">
+            Português (Portugal) – Angola
+          </option>
+          <option value="/intl/pt-PT_cv/about/comment-posting-policy.html">
+            Português (Portugal) – Cabo Verde
+          </option>
+          <option value="/intl/pt-PT_gw/about/comment-posting-policy.html">
+            Português (Portugal) – Guiné Bissau
+          </option>
+          <option value="/intl/pt-PT_mz/about/comment-posting-policy.html">
+            Português (Portugal) – Moçambique
+          </option>
+          <option value="/intl/pt-PT_pt/about/comment-posting-policy.html">
+            Português (Portugal) – Portugal
+          </option>
+          <option value="/intl/ro_md/about/comment-posting-policy.html">
+            Română – Republica Moldova
+          </option>
+          <option value="/intl/ro_ro/about/comment-posting-policy.html">
+            Română – România
+          </option>
+          <option value="/intl/sq_al/about/comment-posting-policy.html">
+            Shqip – Shqipëria
+          </option>
+          <option value="/intl/sk_sk/about/comment-posting-policy.html">
+            Slovenčina – Slovensko
+          </option>
+          <option value="/intl/sl_si/about/comment-posting-policy.html">
+            Slovenščina – Slovenija
+          </option>
+          <option value="/intl/fi_fi/about/comment-posting-policy.html">
+            Suomi – Suomi
+          </option>
+          <option value="/intl/sv_se/about/comment-posting-policy.html">
+            Svenska – Sverige
+          </option>
+          <option value="/intl/vi_vn/about/comment-posting-policy.html">
+            Tiếng Việt – Việt Nam
+          </option>
+          <option value="/intl/tr_cy/about/comment-posting-policy.html">
+            Türkçe – Güney Kıbrıs Rum Kesimi
+          </option>
+          <option value="/intl/tr_tr/about/comment-posting-policy.html">
+            Türkçe – Türkiye
+          </option>
+          <option value="/intl/el_gr/about/comment-posting-policy.html">
+            Ελληνικά – Ελλάδα
+          </option>
+          <option value="/intl/el_cy/about/comment-posting-policy.html">
+            Ελληνικά – Κύπρος
+          </option>
+          <option value="/intl/be_by/about/comment-posting-policy.html">
+            Беларуская – Беларусь
+          </option>
+          <option value="/intl/bg_bg/about/comment-posting-policy.html">
+            Български – България
+          </option>
+          <option value="/intl/mk_mk/about/comment-posting-policy.html">
+            Македонски – Македонија
+          </option>
+          <option value="/intl/ru_az/about/comment-posting-policy.html">
+            Русский – Азербайджан
+          </option>
+          <option value="/intl/ru_am/about/comment-posting-policy.html">
+            Русский – Армения
+          </option>
+          <option value="/intl/ru_by/about/comment-posting-policy.html">
+            Русский – Беларусь
+          </option>
+          <option value="/intl/ru_ba/about/comment-posting-policy.html">
+            Русский – Босния и Герцеговина
+          </option>
+          <option value="/intl/ru_kz/about/comment-posting-policy.html">
+            Русский – Казахстан
+          </option>
+          <option value="/intl/ru_kg/about/comment-posting-policy.html">
+            Русский – Киргизия
+          </option>
+          <option value="/intl/ru_ru/about/comment-posting-policy.html">
+            Русский – Россия
+          </option>
+          <option value="/intl/ru_tj/about/comment-posting-policy.html">
+            Русский – Таджикистан
+          </option>
+          <option value="/intl/ru_tm/about/comment-posting-policy.html">
+            Русский – Туркменистан
+          </option>
+          <option value="/intl/ru_uz/about/comment-posting-policy.html">
+            Русский – Узбекистан
+          </option>
+          <option value="/intl/sr_rs/about/comment-posting-policy.html">
+            Српски – Србија
+          </option>
+          <option value="/intl/uk_ua/about/comment-posting-policy.html">
+            Українська – Україна
+          </option>
+          <option value="/intl/hy_am/about/comment-posting-policy.html">
+            Հայերեն – Հայաստան
+          </option>
+          <option value="/intl/ar_jo/about/comment-posting-policy.html">
+            ‫العربية – الأردن‬
+          </option>
+          <option value="/intl/ar_ae/about/comment-posting-policy.html">
+            ‫العربية – الإمارات العربية المتحدة‬
+          </option>
+          <option value="/intl/ar_bh/about/comment-posting-policy.html">
+            ‫العربية – البحرين‬
+          </option>
+          <option value="/intl/ar_kw/about/comment-posting-policy.html">
+            ‫العربية – الكويت‬
+          </option>
+          <option value="/intl/ar_sa/about/comment-posting-policy.html">
+            ‫العربية – المملكة العربية السعودية‬
+          </option>
+          <option value="/intl/ar_om/about/comment-posting-policy.html">
+            ‫العربية – عُمان‬
+          </option>
+          <option value="/intl/ar_qa/about/comment-posting-policy.html">
+            ‫العربية – قطر‬
+          </option>
+          <option value="/intl/ar_lb/about/comment-posting-policy.html">
+            ‫العربية – لبنان‬
+          </option>
+          <option value="/intl/ar_eg/about/comment-posting-policy.html">
+            ‫العربية – مصر‬
+          </option>
+          <option value="/intl/hi_in/about/comment-posting-policy.html">
+            हिन्दी – भारत
+          </option>
+          <option value="/intl/th_th/about/comment-posting-policy.html">
+            ไทย – ไทย
+          </option>
+          <option value="/intl/th_la/about/comment-posting-policy.html">
+            ไทย – ลาว
+          </option>
+          <option value="/intl/ko_kr/about/comment-posting-policy.html">
+            한국어 – 대한민국
+          </option>
+          <option value="/intl/zh-CN_cn/about/comment-posting-policy.html">
+            中文（简体中文） – 中国
+          </option>
+          <option value="/intl/zh-TW_tw/about/comment-posting-policy.html">
+            中文（繁體中文） – 台灣
+          </option>
+          <option value="/intl/zh-TW_hk/about/comment-posting-policy.html">
+            中文（繁體中文） – 香港
+          </option>
+          <option value="/intl/ja_jp/about/comment-posting-policy.html">
+            日本語 – 日本
+          </option>
+        </select></label>
+      </div>
+    </div>
+    <script>
+    (function(H){H.className=H.className.replace('google-nojs','google-js')})(document.documentElement)
+    </script>
+  </body>
+</html>

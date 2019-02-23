@@ -74,7 +74,7 @@ let pipeline x = agentRetn x >>= agent1 >>= agent2
 
 for i in [1..10] do
     pipeline (string i)
-    |> AsyncEx.run (fun res -> printfn "Thread #id: %d - Msg: %s" Thread.CurrentThread.ManagedThreadId res)
+    |> Async.run (fun res -> printfn "Thread #id: %d - Msg: %s" Thread.CurrentThread.ManagedThreadId res)
 
 module PipelineKliesli =
     let (>=>) f1 f2 x = f1 x >>= f2
@@ -179,7 +179,7 @@ module AgentComposition =
     let parallelTransformImages() =
        let images = Directory.GetFiles(Environment.CurrentDirectory + @"/src/FunConcurrency/Images")
        for image in images do
-            parallelPipeline image |> AsyncEx.run (fun imageName -> printfn "Saved image %s" imageName)
+            parallelPipeline image |> Async.run (fun imageName -> printfn "Saved image %s" imageName)
 
     parallelTransformImages()
 
