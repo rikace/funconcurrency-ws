@@ -2,7 +2,7 @@ module FunConcurrency.AgentWebCrawler
 
 #if INTERACTIVE
 #load "../Common/Helpers.fs"
-#load "../Asynchronous/Async.fs"
+#load "../Module3_Asynchronous/Async.fs"
 #r "../../../packages/HtmlAgilityPack/lib/netstandard2.0/HtmlAgilityPack.dll"
 #endif
 
